@@ -1,7 +1,7 @@
 import { PubSub, Message } from "@google-cloud/pubsub";
 import { CONFIG } from "./local_config";
 
-const { projectId, topicName, subscriptionName } = CONFIG;
+const { projectId, subscriptionName } = CONFIG;
 
 const pubSubClient = new PubSub({ projectId });
 
@@ -11,16 +11,13 @@ function messageHandler(message: Message) {
   const messageData = message.data.toString("utf8");
 
   console.log(
-    `[${new Date().toISOString()}]Received message: ${messageData}, attempt: ${
-      message.deliveryAttempt
-    }`
+    `[${new Date().toISOString()}]Received message: ${messageData}(ID:${message.id})`
   );
 
-  console.log(`Message attributes: ${JSON.stringify(message.attributes)}`);
-  
   // Checks if the message data is equal to "ignore"
   if (messageData === "ignore") {
     console.log(`Ignoring message: ${messageData}`);
+    message.nack();
   } else {
     console.log(`Received message: ${messageData}`);
     // Acknowledges the message
